@@ -1,18 +1,29 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { logout } from '../redux/slices/authSlice';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation(); // Get the current location
 
   // Handle logout action
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/login');
+    navigate('/'); // Navigate to Home page
   };
+
+  // Handle login action
+  const handleLogin = () => {
+    navigate('/login'); // Navigate to Login page
+  };
+
+  // Determine if on Home page
+  const isHomePage = location.pathname === '/';
 
   return (
     <nav className="bg-gray-800 text-white">
@@ -53,10 +64,13 @@ const Navbar = () => {
             Home
           </a>
           <a href="/categories" className="block py-2 px-4 hover:text-yellow-500">
-            Categories
+            Communities
           </a>
-          <a href="/wallet" className="block py-2 px-4 hover:text-yellow-500">
-            Wallet
+          <Link to="/wallet" className="block py-2 px-4 hover:text-yellow-500">
+  Wallet
+</Link>
+          <a href="/signup" className="block py-2 px-4 hover:text-yellow-500">
+            Sign Up
           </a>
 
           {/* Dropdown */}
@@ -77,13 +91,22 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Logout button */}
-          <button
-            onClick={handleLogout}
-            className="mt-2 lg:mt-0 py-2 px-4 bg-red-500 hover:bg-red-600 rounded-lg text-white"
-          >
-            Logout
-          </button>
+          {/* Conditional Button */}
+          {isHomePage ? (
+            <button
+              onClick={handleLogin}
+              className="mt-2 lg:mt-0 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-lg text-white"
+            >
+              Login
+            </button>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="mt-2 lg:mt-0 py-2 px-4 bg-red-500 hover:bg-red-600 rounded-lg text-white"
+            >
+              Logout
+            </button>
+          )}
         </div>
       </div>
     </nav>

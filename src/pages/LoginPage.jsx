@@ -1,67 +1,56 @@
-// src/pages/LoginPage.jsx
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../redux/slices/authSlice';
+import InputField from '../components/InputField';
+import SubmitButton from '../components/SubmitButton';
+import ErrorMessage from '../components/ErrorMessage';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { loading, error, token } = useSelector((state) => state.auth);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleLogin = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!email || !password) {
-      setError('Both fields are required.');
+      alert('Please fill in both email and password.');
       return;
     }
 
-    try {
-      await dispatch(loginUser({ email, password })).unwrap();
-      navigate('/dashboard'); // Redirect to dashboard on success
-    } catch (err) {
-      setError(err.message || 'Login failed.');
-    }
+    dispatch(loginUser({ email, password }));
   };
 
+  if (token) navigate('/dashboard');
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-8 rounded shadow-md w-full max-w-md"
-      >
-        <h2 className="text-2xl font-bold mb-4">Login</h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-gray-700">Email</label>
-          <input
-            type="email"
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
+        <h1 className="text-3xl font-bold mb-4 text-center">Login</h1>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <InputField
             id="email"
+            label="Email"
+            type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 border rounded"
+            required
           />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="password" className="block text-gray-700">Password</label>
-          <input
-            type="password"
+          <InputField
             id="password"
+            label="Password"
+            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border rounded"
+            required
           />
-        </div>
-        <button
-          type="submit"
-          className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-800"
-        >
-          Login
-        </button>
-      </form>
+          <SubmitButton label="Login" loading={loading} />
+          {error && <ErrorMessage message={error} />}
+        </form>
+      </div>
     </div>
   );
 };

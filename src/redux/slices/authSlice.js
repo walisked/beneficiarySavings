@@ -1,21 +1,39 @@
-// src/redux/slices/authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+// Async thunk for user login
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await axios.post('/api/login', credentials);
-      const { token } = response.data;
-      localStorage.setItem('token', token); // Store token
-      return response.data;
+      const { token, user } = response.data;
+      localStorage.setItem('token', token);
+      return { token, user };
     } catch (error) {
-      return rejectWithValue(error.response.data.message || 'Login failed.');
+      console.error('Login error:', error.response?.data?.message || error.message);
+      return rejectWithValue(error.response?.data?.message || 'Login failed.');
     }
   }
 );
 
+// Async thunk for user signup
+export const signupUser = createAsyncThunk(
+  'auth/signupUser',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post('/api/signup', userData);
+      const { token, user } = response.data;
+      localStorage.setItem('token', token);
+      return { token, user };
+    } catch (error) {
+      console.error('Signup error:', error.response?.data?.message || error.message);
+      return rejectWithValue(error.response?.data?.message || 'Signup failed.');
+    }
+  }
+);
+
+// Auth slice
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
@@ -29,6 +47,7 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       localStorage.removeItem('token');
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -43,6 +62,20 @@ const authSlice = createSlice({
         state.user = action.payload.user;
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Handle signupUser async thunk
+      .addCase(signupUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(signupUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.token = action.payload.token;
+        state.user = action.payload.user;
+      })
+      .addCase(signupUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

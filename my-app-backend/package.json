@@ -1,0 +1,22 @@
+{
+  "name": "my-app-backend",
+  "version": "1.0.0",
+  "description": "Akafta!!",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "walisked",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "mongoose": "^8.9.4",
+    "pug": "^3.0.3"
+  }
+}

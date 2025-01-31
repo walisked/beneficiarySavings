@@ -23,12 +23,12 @@ const HeroSection = () => {
     <section className="bg-gray-900 text-white py-24 px-4">
       <div className="container mx-auto flex flex-col items-center justify-center text-center">
         {/* Title and Description */}
-        <h1 className="text-4xl font-bold mb-4">Featured Movie Title</h1>
-        <p className="text-lg mb-6">Explore the best movies available right now.</p>
+        <h1 className="text-4xl font-bold mb-4">Features are Called with Title</h1>
+        <p className="text-lg mb-6">Explore the best content available right now.</p>
 
         {/* Watch Now Button */}
         <button className="bg-red-500 hover:bg-red-600 px-6 py-3 rounded-lg text-lg font-semibold uppercase">
-          Watch Now
+          LOOK OVER
         </button>
 
         {/* Search Bar */}
@@ -36,7 +36,7 @@ const HeroSection = () => {
           <div className="flex items-center border border-gray-500 rounded-lg overflow-hidden">
             <input
               type="text"
-              placeholder="Search for movies..."
+              placeholder="Search for Content"
               value={searchQuery}
               onChange={handleInputChange}
               className="w-full px-4 py-2 text-black focus:outline-none focus:ring-2 focus:ring-red-500"
