@@ -74,24 +74,6 @@ const SignupPage = () => {
             onChange={handleChange}
             error={formErrors.email}
           />
-          <InputField
-            id="password"
-            label="Password"
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            error={formErrors.password}
-          />
-          <InputField
-            id="phoneNumber"
-            label="Phone Number"
-            type="text"
-            name="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handleChange}
-            error={formErrors.phoneNumber}
-          />
           <SubmitButton label="Sign Up" loading={loading} />
           {error && <ErrorMessage message={error} />}
         </form>

@@ -30,7 +30,7 @@ const PersonalInfoForm = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <form className="bg-white p-8 rounded-lg shadow-md w-full max-w-4xl">
-        <h2 className="text-2xl font-bold mb-6 text-center">Personal Information</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Distributor Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* First Name */}
           <div>
