@@ -11,6 +11,8 @@ const NextOfKinForm = () => {
     consent: false,
   });
 
+
+  // Handle form input change
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -19,6 +21,7 @@ const NextOfKinForm = () => {
     });
   };
 
+  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.declaration || !formData.consent) {
@@ -30,101 +33,98 @@ const NextOfKinForm = () => {
     alert("Form submitted successfully!");
   };
 
+  
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-xl font-semibold text-gray-700 mb-4">Next of Kin Information</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 gap-4">
-          {/* Full Name */}
-          <input
-            type="text"
-            name="fullName"
-            placeholder="Full Name"
-            value={formData.fullName}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-md"
-            required
-          />
-
-          {/* Relationship */}
-          <input
-            type="text"
-            name="relationship"
-            placeholder="Relationship"
-            value={formData.relationship}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-md"
-            required
-          />
-
-          {/* Phone */}
-          <input
-            type="tel"
-            name="phone"
-            placeholder="Phone"
-            value={formData.phone}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-md"
-            required
-          />
-
-          {/* Email */}
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-md"
-            required
-          />
-
-          {/* Address */}
-          <input
-            type="text"
-            name="address"
-            placeholder="Address"
-            value={formData.address}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-md"
-            required
-          />
-        </div>
-
-        {/* Declarations */}
-        <div className="space-y-2">
-          <label className="flex items-center">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="max-w-lg mx-auto p-8 bg-white rounded-lg shadow-lg mb-20">
+        <h2 className="text-xl font-semibold text-gray-800 text-center mb-6">
+          Next of Kin Information
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            {/* Full Name */}
             <input
-              type="checkbox"
-              name="declaration"
-              checked={formData.declaration}
+              type="text"
+              name="fullName"
+              placeholder="Full Name"
+              value={formData.fullName}
               onChange={handleChange}
-              className="mr-2"
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               required
             />
-            I declare my information is correct.
-          </label>
-          <label className="flex items-center">
+
+            {/* Relationship */}
             <input
-              type="checkbox"
-              name="consent"
-              checked={formData.consent}
+              type="text"
+              name="relationship"
+              placeholder="Relationship"
+              value={formData.relationship}
               onChange={handleChange}
-              className="mr-2"
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               required
             />
-            I consent to personal data use.
-          </label>
-        </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
-        >
-          Submit
-        </button>
-      </form>
+            {/* Phone */}
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              required
+            />
+
+            {/* Email */}
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              required
+            />
+
+            {/* Address */}
+            <input
+              type="text"
+              name="address"
+              placeholder="Address"
+              value={formData.address}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              required
+            />
+          </div>
+
+          {/* Declarations */}
+          <div className="space-y-2">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                name="declaration"
+                checked={formData.declaration}
+                onChange={handleChange}
+                className="mr-2"
+                required
+              />
+              I declare my information is correct.
+            </label>
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                name="consent"
+                checked={formData.consent}
+                onChange={handleChange}
+                className="mr-2"
+                required
+              />
+              I consent to personal data use.
+            </label>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

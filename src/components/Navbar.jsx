@@ -63,7 +63,7 @@ const Navbar = () => {
           <a href="/" className="block py-2 px-4 hover:text-yellow-500">
             Home
           </a>
-          <a href="/categories" className="block py-2 px-4 hover:text-yellow-500">
+          <a href="/communities" className="block py-2 px-4 hover:text-yellow-500">
             Communities
           </a>
           <Link to="/wallet" className="block py-2 px-4 hover:text-yellow-500">
@@ -83,7 +83,7 @@ const Navbar = () => {
                 About
               </a>
               <a href="/contact" className="block px-4 py-2 hover:bg-gray-600">
-                Contact
+                ContactUs
               </a>
               <a href="/terms" className="block px-4 py-2 hover:bg-gray-600">
                 Terms & Conditions

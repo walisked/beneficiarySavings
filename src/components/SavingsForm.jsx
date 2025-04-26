@@ -1,18 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const SavingsForm = () => {
   // State for form inputs
-  const [selectedSavingsType, setSelectedSavingsType] = useState('');
-  const [customSavingsGoal, setCustomSavingsGoal] = useState('');
+  const [selectedSavingsType, setSelectedSavingsType] = useState("");
+  const [customSavingsGoal, setCustomSavingsGoal] = useState("");
+  const [formSubmitted, setFormSubmitted] = useState(false);
+
+  // State for tracking the community savings group selection
+  const [selectedGroup, setSelectedGroup] = useState("");
 
   // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log({
-      selectedSavingsType,
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (!selectedSavingsType || !customSavingsGoal) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    const formData = {
+      savingsType: selectedSavingsType,
       customSavingsGoal,
-    });
-    alert('Form submitted successfully!');
+      selectedGroup,
+    };
+
+    console.log("Form Submitted with data:", formData);
+    setFormSubmitted(true);
   };
 
   return (
@@ -36,8 +48,8 @@ const SavingsForm = () => {
               onClick={() => setSelectedSavingsType(type)}
               className={`px-4 py-2 rounded-lg ${
                 selectedSavingsType === type
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
+                  ? "bg-blue-600 text-white"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
               }`}
             >
               {type}
@@ -46,25 +58,39 @@ const SavingsForm = () => {
         </div>
 
         {/* Community Group Savings Table */}
-        <h3 className="text-lg font-semibold mb-3">✅  Available Communities</h3>
+        <h3 className="text-lg font-semibold mb-3">✅ Available Communities</h3>
         <table className="w-full border-collapse border border-gray-300 mb-6">
           <thead className="bg-gray-100">
             <tr>
               <th className="border p-2">Group Name</th>
               <th className="border p-2">Members</th>
               <th className="border p-2">Next Withdrawal User</th>
+              <th className="border p-2">Select</th>
             </tr>
           </thead>
           <tbody>
             {[
               { name: "Arewa Unity", members: 10, nextUser: "Aliyu Musa" },
               { name: "Tech Innovators", members: 8, nextUser: "Zainab Bello" },
-              { name: "Creative Minds", members: 12, nextUser: "Abdullahi Umar" },
+              {
+                name: "Creative Minds",
+                members: 12,
+                nextUser: "Abdullahi Umar",
+              },
             ].map((group, index) => (
               <tr key={index} className="text-center">
                 <td className="border p-2">{group.name}</td>
                 <td className="border p-2">{group.members}</td>
                 <td className="border p-2">{group.nextUser}</td>
+                <td className="border p-2">
+                  <input
+                    type="radio"
+                    name="group"
+                    value={group.name}
+                    checked={selectedGroup === group.name}
+                    onChange={() => setSelectedGroup(group.name)}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -79,14 +105,6 @@ const SavingsForm = () => {
           className="w-full p-2 border rounded-md"
           placeholder="Enter your custom savings goal"
         />
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="mt-6 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700"
-        >
-          Next
-        </button>
       </form>
     </div>
   );

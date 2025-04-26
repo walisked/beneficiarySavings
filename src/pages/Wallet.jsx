@@ -19,7 +19,7 @@ export default function CalendarWallet() {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div>
       {/* Wallet Details */}
       <div className="mb-6 bg-white p-4 rounded-lg shadow-md">
         <h2 className="text-lg font-bold mb-2">Wallet Details</h2>

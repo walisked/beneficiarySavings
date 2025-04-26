@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const InvestmentForm = () => {
   // State for form inputs
-  const [occupation, setOccupation] = useState('');
-  const [employer, setEmployer] = useState('');
-  const [monthlyEarnings, setMonthlyEarnings] = useState('');
-  const [selectedInvestment, setSelectedInvestment] = useState('');
-  const [selectedContribution, setSelectedContribution] = useState('');
-  const [contributionFrequency, setContributionFrequency] = useState('');
+  const [occupation, setOccupation] = useState("");
+  const [employer, setEmployer] = useState("");
+  const [monthlyEarnings, setMonthlyEarnings] = useState("");
+  const [selectedInvestment, setSelectedInvestment] = useState("");
+  const [selectedContribution, setSelectedContribution] = useState("");
+  const [contributionFrequency, setContributionFrequency] = useState("");
 
   // Handle form submission
   const handleSubmit = (e) => {
@@ -20,12 +20,12 @@ const InvestmentForm = () => {
       selectedContribution,
       contributionFrequency,
     });
-    alert('Form submitted successfully!');
+    alert("Form submitted successfully!");
   };
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-xl font-semibold mb-4"> Employment/Occupation Details</h2>
+      <h2 className="text-xl font-semibold mb-4">Employment/Occupation Details</h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Occupation */}
@@ -70,22 +70,26 @@ const InvestmentForm = () => {
         {/* Investment Options */}
         <h3 className="mt-6 text-lg font-semibold">🟢 Investment Options</h3>
         <div className="flex flex-wrap gap-2">
-          {["Tenured Investment", "Proof of Funds", "Special Savings", "Parofund Esusu Plus", "Derivatives"].map(
-            (option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setSelectedInvestment(option)}
-                className={`px-4 py-2 rounded-lg ${
-                  selectedInvestment === option
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-blue-500 text-white hover:bg-blue-600'
-                }`}
-              >
-                {option}
-              </button>
-            )
-          )}
+          {[
+            "Tenured Investment",
+            "Proof of Funds",
+            "Special Savings",
+            "Parofund Esusu Plus",
+            "Derivatives",
+          ].map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setSelectedInvestment(option)}
+              className={`px-4 py-2 rounded-lg ${
+                selectedInvestment === option
+                  ? "bg-blue-600 text-white"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
+              }`}
+            >
+              {option}
+            </button>
+          ))}
         </div>
 
         {/* Savings Contribution Structure */}
@@ -94,15 +98,23 @@ const InvestmentForm = () => {
           {[
             {
               title: "Easter Savings Cash",
-              options: ["₦2500 min: 600 max: 5000 Daily", "₦8500 Weekly min: 4000 max: 14000", "₦2500 min: 5000 max: 100,000 Monthly"],
+              options: [
+                "₦2500 min: 600 max: 5000 Daily",
+                "₦8500 Weekly min: 4000 max: 14000",
+                "₦2500 min: 5000 max: 100,000 Monthly",
+              ],
             },
             {
               title: "Sallah Savings Cash",
-              options: ["₦2500 min: N500 max: N5000 Daily", "₦14000 Weekly min: N8500 max: N20,000", "₦10,000 min: N5000 max: N100,000 Monthly"],
+              options: [
+                "₦2500 min: N500 max: N5000 Daily",
+                "₦14000 Weekly min: N8500 max: N20,000",
+                "₦10,000 min: N5000 max: N100,000 Monthly",
+              ],
             },
             {
               title: "Target Savings",
-              options: ["Daily: ₦200", "₦300", "₦400",],
+              options: ["Daily: ₦200", "₦300", "₦400"],
             },
             {
               title: "Special Target Savings",
@@ -119,8 +131,8 @@ const InvestmentForm = () => {
                     onClick={() => setSelectedContribution(opt)}
                     className={`px-3 py-1 rounded-md ${
                       selectedContribution === opt
-                        ? 'bg-green-600 text-white'
-                        : 'bg-green-500 text-white hover:bg-green-600'
+                        ? "bg-green-600 text-white"
+                        : "bg-green-500 text-white hover:bg-green-600"
                     }`}
                   >
                     {opt}
@@ -149,17 +161,13 @@ const InvestmentForm = () => {
             </label>
           ))}
         </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="mt-6 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700"
-        >
-          Submit
-        </button>
       </form>
     </div>
   );
 };
 
 export default InvestmentForm;
+//State Management: States are properly tracked for occupation, employer, monthlyEarnings, selectedInvestment, selectedContribution, and contributionFrequency.
+//Form Rendering: The form fields are set to capture the relevant user data, and buttons are set up to allow users to select from investment options and contribution frequencies.
+//Handling Form Submission: When the form is submitted, the collected data is logged to the console, and an alert is shown.
+//Custom Styles: The form is styled using Tailwind CSS classes to provide a clean and responsive design.

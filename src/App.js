@@ -1,48 +1,56 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/Signup";
-import CalendarWallet from "./pages/Wallet";
+import SignupPage from "./pages/SignupPage";
+import About from "./pages/AboutUs.jsx";
+import TermsAndConditions from "./pages/TermsAndCondition.jsx";
+import UserDashboard from "./pages/UserDashboard.jsx";
 import Navbar from "./components/Navbar";
-import ContactInformationForm from "./components/ContactInformationForm";
-import FaceValidation from "./components/FaceValidation";
-import PersonalInfoForm from "./components/PersonalInfoForm";
-import IdentificationDetails from "./components/IdentificationDetails";
-import InvestmentForm from "./components/InvestmentForm";
-import SavingsForm from "./components/SavingsForm";
-import NextOfKinForm from "./components/NextOfKinForm";
-import Market from "./pages/Market";
+import Footer from "./components/Footer";
+import UserLayout from "./components/UserLayout";
 
 const App = () => {
   return (
     <Router>
-      <Navbar />
+      <AppContent />
+    </Router>
+  );
+};
+
+const AppContent = () => {
+  const location = useLocation(); // Now inside the Router context
+
+  // Define routes where the Navbar should not be displayed
+  const noNavbarRoutes = ["/user-dashboard", "/user-dashboard/wallet", "/user-dashboard/settings", "/user-dashboard/logout"];
+
+  return (
+    <>
+      {/* Conditionally render the Navbar */}
+      {!noNavbarRoutes.includes(location.pathname) && <Navbar />}
+
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
-        {/* level 1  */}
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+
+        {/* User Routes with Sidebar */}
         <Route
-          path="/ContactInformationForm"
-          element={<ContactInformationForm />}
+          path="/user-dashboard/*"
+          element={
+            <UserLayout>
+              <UserDashboard />
+            </UserLayout>
+          }
         />
-        <Route path="/InvestmentForm" element={<InvestmentForm />} />
-        {/* level 2 */}
-        <Route
-          path="/IdentificationDetails"
-          element={<IdentificationDetails />}
-        />
-        <Route path="/SavingsForm" element={<SavingsForm />} />
-        <Route path="/NextOfKinForm" element={<NextOfKinForm />} />
-        {/* DashBoard */}
-        <Route path="/Market" element={<Market />} />
-        <Route path="/wallet" element={<CalendarWallet />} /> {/* level 3 */}
-        <Route path="/personal-info" element={<PersonalInfoForm />} />
-        <Route path="/face-validation" element={<FaceValidation />} />
-    
       </Routes>
-    </Router>
+
+      {/* Conditionally render the Footer */}
+      {!noNavbarRoutes.includes(location.pathname) && <Footer />}
+    </>
   );
 };
 

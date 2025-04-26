@@ -3,12 +3,13 @@ import ProductCard from "../components/ProductCard";
 import NewsCard from "../components/NewsCard";
 import CommunityHighlights from "../components/CommunityHighlights";
 import MVPSavers from "../components/MVPSavers";
+import SlidingButtons from "../components/ScrollableButtons"
 
 const Market = () => {
   return (
     <div className="bg-gray-100 p-8">
       <div className="flex flex-col space-y-8">
-        
+        <SlidingButtons/>
         {/* Trending Products */}
         <div className="bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-lg font-semibold mb-2">Trending Products</h2>
