@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
+import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 const BRMSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
@@ -14,4 +14,6 @@ BRMSchema.pre("save", async function (next) {
   next();
 });
 
-module.exports = mongoose.model("BRM", BRMSchema);
+const BRM = mongoose.model("BRM", BRMSchema);
+
+export default BRM; // Use default export

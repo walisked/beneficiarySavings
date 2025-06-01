@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const PasswordInput = () => {
+const PasswordInput = ({ formData, setFormData, onSubmit }) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -15,7 +15,7 @@ const PasswordInput = () => {
       setError("Passwords do not match.");
     } else {
       setError("");
-      alert("Passwords match! ✅");
+      setFormData({ ...formData, password });
     }
   };
 
@@ -68,14 +68,6 @@ const PasswordInput = () => {
 
         {/* Error Message */}
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-
-        {/* Submit Button */}
-        <button
-          onClick={validatePasswords}
-          className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition"
-        >
-          Submit
-        </button>
       </div>
     </div>
   );

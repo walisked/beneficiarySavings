@@ -14,18 +14,29 @@ const ContactInformationForm = ({ formData, setFormData }) => {
 
   // Fetch states
   useEffect(() => {
-    fetch("http://states-and-cities.com/api/v1/states")
+    fetch("http://localhost:5000/api/states")
       .then((response) => response.json())
-      .then((data) => setStates(data))
+      .then((data) => {
+        // Ensure the states array is an array of objects with `name` and `code`
+        const stateList = data.map((state) => ({
+          name: state, // State name
+          code: state, // State code (can be the same as the name)
+        }));
+        console.log("Fetched states:", stateList); // Debugging
+        setStates(stateList);
+      })
       .catch((error) => console.error("Error fetching states:", error));
   }, []);
 
   // Fetch LGAs when a state is selected
   useEffect(() => {
     if (selectedState) {
-      fetch(`http://states-and-cities.com/api/v1/states/${selectedState}/lgas`)
+      fetch(`http://localhost:5000/api/lgas?state=${selectedState}`)
         .then((response) => response.json())
-        .then((data) => setLgas(data))
+        .then((data) => {
+          console.log("Fetched LGAs:", data); // Debugging
+          setLgas(data);
+        })
         .catch((error) => console.error("Error fetching LGAs:", error));
     }
   }, [selectedState]);
@@ -133,9 +144,9 @@ const ContactInformationForm = ({ formData, setFormData }) => {
             required
           >
             <option value="">Select State</option>
-            {states.map((state) => (
-              <option key={state} value={state}>
-                {state}
+            {states.map((state, index) => (
+              <option key={index} value={state.name}>
+                {state.name}
               </option>
             ))}
           </select>
@@ -151,8 +162,8 @@ const ContactInformationForm = ({ formData, setFormData }) => {
             required
           >
             <option value="">Select LGA</option>
-            {lgas.map((lga) => (
-              <option key={lga} value={lga}>
+            {lgas.map((lga, index) => (
+              <option key={index} value={lga}>
                 {lga}
               </option>
             ))}

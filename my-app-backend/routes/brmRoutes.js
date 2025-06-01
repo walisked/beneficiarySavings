@@ -1,7 +1,8 @@
-const express = require("express");
+import express from "express";
+import bcrypt from "bcrypt";
+import BRM from "../models/BRM.js"; // Adjust import syntax
+
 const router = express.Router();
-const BRM = require("../models/BRM");
-const bcrypt = require("bcrypt");
 
 // ✅ CREATE - Admin Onboards a New BRM
 router.post("/create", async (req, res) => {
@@ -50,4 +51,4 @@ router.delete("/delete/:id", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router; // Use default export

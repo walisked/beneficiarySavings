@@ -161,10 +161,6 @@ const IdentificationDetails = ({
             {addressError && <p className="text-sm text-red-600 mt-1">{addressError}</p>}
           </div>
         </div>
-        <div className="flex justify-between mt-6">
-          <button type="button" onClick={prevStep} className="bg-gray-500 text-white px-4 py-2 rounded-md">Previous</button>
-          <button type="button" onClick={nextStep} className="bg-blue-600 text-white px-4 py-2 rounded-md">Next</button>
-        </div>
       </form>
     </div>
   );

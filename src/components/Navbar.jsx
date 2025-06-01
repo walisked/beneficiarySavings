@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { logout } from '../redux/slices/authSlice';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { logout } from "../redux/slices/authSlice";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,16 +13,16 @@ const Navbar = () => {
   // Handle logout action
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/'); // Navigate to Home page
+    navigate("/"); // Navigate to Home page
   };
 
   // Handle login action
   const handleLogin = () => {
-    navigate('/login'); // Navigate to Login page
+    navigate("/login"); // Navigate to Login page
   };
 
   // Determine if on Home page
-  const isHomePage = location.pathname === '/';
+  const isHomePage = location.pathname === "/";
 
   return (
     <nav className="bg-gray-800 text-white">
@@ -47,9 +46,17 @@ const Navbar = () => {
             className="w-6 h-6"
           >
             {isMenuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
             ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 6h16M4 12h16m-7 6h7"
+              />
             )}
           </svg>
         </button>
@@ -57,18 +64,21 @@ const Navbar = () => {
         {/* Navigation links */}
         <div
           className={`${
-            isMenuOpen ? 'block' : 'hidden'
+            isMenuOpen ? "block" : "hidden"
           } lg:flex flex-col lg:flex-row lg:space-x-6 lg:items-center w-full lg:w-auto`}
         >
           <a href="/" className="block py-2 px-4 hover:text-yellow-500">
             Home
           </a>
-          <a href="/communities" className="block py-2 px-4 hover:text-yellow-500">
+          <a
+            href="/communities"
+            className="block py-2 px-4 hover:text-yellow-500"
+          >
             Communities
           </a>
           <Link to="/wallet" className="block py-2 px-4 hover:text-yellow-500">
-  Wallet
-</Link>
+            Wallet
+          </Link>
           <a href="/signup" className="block py-2 px-4 hover:text-yellow-500">
             Sign Up
           </a>
@@ -79,15 +89,15 @@ const Navbar = () => {
               More
             </button>
             <div className="absolute hidden group-hover:block bg-gray-700 text-white rounded-md shadow-lg">
-              <a href="/about" className="block px-4 py-2 hover:bg-gray-600">
+              <Link to="/about" className="block px-4 py-2 hover:bg-gray-600">
                 About
-              </a>
-              <a href="/contact" className="block px-4 py-2 hover:bg-gray-600">
+              </Link>
+              <Link to="/ContactPage" className="block px-4 py-2 hover:bg-gray-600">
                 ContactUs
-              </a>
-              <a href="/terms" className="block px-4 py-2 hover:bg-gray-600">
+              </Link>
+              <Link to="/terms" className="block px-4 py-2 hover:bg-gray-600">
                 Terms & Conditions
-              </a>
+              </Link>
             </div>
           </div>
 

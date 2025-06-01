@@ -3,12 +3,17 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import CommunityPage from "./pages/Communities.jsx"
 import About from "./pages/AboutUs.jsx";
+import ContactPage from "./pages/Contact.jsx"
 import TermsAndConditions from "./pages/TermsAndCondition.jsx";
 import UserDashboard from "./pages/UserDashboard.jsx";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import UserLayout from "./components/UserLayout";
+import AdminDashboard from "./pages/AdminDashboard.jsx"
+import BRMDashboard from "./pages/BRMDashboard.jsx"
+import CalendarWallet from "./pages/Wallet.jsx"
 
 const App = () => {
   return (
@@ -34,8 +39,14 @@ const AppContent = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/communities" element={<CommunityPage/>}/>
         <Route path="/about" element={<About />} />
+        <Route path="/ContactPage" element={<ContactPage/>}/>
         <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/brm-dashboard" element={<BRMDashboard />} />
+        <Route path="wallet" element={<CalendarWallet/>}/>
+
 
         {/* User Routes with Sidebar */}
         <Route

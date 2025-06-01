@@ -1,40 +1,25 @@
-import React, { useState } from "react";
+import React from "react";
 
-const InvestmentForm = () => {
-  // State for form inputs
-  const [occupation, setOccupation] = useState("");
-  const [employer, setEmployer] = useState("");
-  const [monthlyEarnings, setMonthlyEarnings] = useState("");
-  const [selectedInvestment, setSelectedInvestment] = useState("");
-  const [selectedContribution, setSelectedContribution] = useState("");
-  const [contributionFrequency, setContributionFrequency] = useState("");
-
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log({
-      occupation,
-      employer,
-      monthlyEarnings,
-      selectedInvestment,
-      selectedContribution,
-      contributionFrequency,
-    });
-    alert("Form submitted successfully!");
+const InvestmentForm = ({ formData, setFormData, errors }) => {
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
       <h2 className="text-xl font-semibold mb-4">Employment/Occupation Details</h2>
-      <form onSubmit={handleSubmit}>
+      <form>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Occupation */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Occupation</label>
             <input
               type="text"
-              value={occupation}
-              onChange={(e) => setOccupation(e.target.value)}
+              value={formData.occupation}
+              onChange={(e) => handleInputChange("occupation", e.target.value)}
               className="mt-1 p-2 w-full border rounded-md"
               placeholder="Enter your occupation"
               required
@@ -46,8 +31,8 @@ const InvestmentForm = () => {
             <label className="block text-sm font-medium text-gray-700">Employer (if applicable)</label>
             <input
               type="text"
-              value={employer}
-              onChange={(e) => setEmployer(e.target.value)}
+              value={formData.employer}
+              onChange={(e) => handleInputChange("employer", e.target.value)}
               className="mt-1 p-2 w-full border rounded-md"
               placeholder="Enter employer name"
             />
@@ -58,8 +43,8 @@ const InvestmentForm = () => {
             <label className="block text-sm font-medium text-gray-700">Monthly Earnings</label>
             <input
               type="number"
-              value={monthlyEarnings}
-              onChange={(e) => setMonthlyEarnings(e.target.value)}
+              value={formData.monthlyEarnings}
+              onChange={(e) => handleInputChange("monthlyEarnings", e.target.value)}
               className="mt-1 p-2 w-full border rounded-md"
               placeholder="₦50,000 - ₦10,000,000"
               required
@@ -76,13 +61,14 @@ const InvestmentForm = () => {
             "Special Savings",
             "Parofund Esusu Plus",
             "Derivatives",
+            "Sanata",
           ].map((option) => (
             <button
               key={option}
               type="button"
-              onClick={() => setSelectedInvestment(option)}
+              onClick={() => handleInputChange("selectedInvestment", option)}
               className={`px-4 py-2 rounded-lg ${
-                selectedInvestment === option
+                formData.selectedInvestment === option
                   ? "bg-blue-600 text-white"
                   : "bg-blue-500 text-white hover:bg-blue-600"
               }`}
@@ -99,26 +85,26 @@ const InvestmentForm = () => {
             {
               title: "Easter Savings Cash",
               options: [
-                "₦2500 min: 600 max: 5000 Daily",
-                "₦8500 Weekly min: 4000 max: 14000",
-                "₦2500 min: 5000 max: 100,000 Monthly",
+                " min: N500 max: N5,000",
+                " min: ₦5,000 max: N10,000",
+                "min: N20,000 max: N100,000",
               ],
             },
             {
               title: "Sallah Savings Cash",
               options: [
-                "₦2500 min: N500 max: N5000 Daily",
-                "₦14000 Weekly min: N8500 max: N20,000",
-                "₦10,000 min: N5000 max: N100,000 Monthly",
+                " min: N500 max: N5,000",
+                " min: ₦5,000 max: N10,000",
+                "min: N20,000 max: N100,000",
               ],
             },
             {
               title: "Target Savings",
-              options: ["Daily: ₦200", "₦300", "₦400"],
+              options: ["Daily: ₦500,000" - "₦10,000,000"],
             },
             {
               title: "Special Target Savings",
-              options: ["₦2500 - ₦100,000 Monthly"],
+              options: ["₦10,000,000 - ₦100,000,000"],
             },
           ].map(({ title, options }) => (
             <div key={title} className="p-4 border rounded-lg shadow-sm">
@@ -128,9 +114,9 @@ const InvestmentForm = () => {
                   <button
                     key={opt}
                     type="button"
-                    onClick={() => setSelectedContribution(opt)}
+                    onClick={() => handleInputChange("selectedContribution", opt)}
                     className={`px-3 py-1 rounded-md ${
-                      selectedContribution === opt
+                      formData.selectedContribution === opt
                         ? "bg-green-600 text-white"
                         : "bg-green-500 text-white hover:bg-green-600"
                     }`}
@@ -152,8 +138,8 @@ const InvestmentForm = () => {
                 type="radio"
                 name="contribution"
                 value={freq}
-                checked={contributionFrequency === freq}
-                onChange={() => setContributionFrequency(freq)}
+                checked={formData.contributionFrequency === freq}
+                onChange={() => handleInputChange("contributionFrequency", freq)}
                 className="h-4 w-4"
                 required
               />
@@ -167,7 +153,3 @@ const InvestmentForm = () => {
 };
 
 export default InvestmentForm;
-//State Management: States are properly tracked for occupation, employer, monthlyEarnings, selectedInvestment, selectedContribution, and contributionFrequency.
-//Form Rendering: The form fields are set to capture the relevant user data, and buttons are set up to allow users to select from investment options and contribution frequencies.
-//Handling Form Submission: When the form is submitted, the collected data is logged to the console, and an alert is shown.
-//Custom Styles: The form is styled using Tailwind CSS classes to provide a clean and responsive design.

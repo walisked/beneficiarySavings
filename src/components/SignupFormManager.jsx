@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from "axios";
 import SignupForm from "./SignupForm";
 import ContactInformationForm from "./ContactInformationForm";
 import InvestmentForm from "./InvestmentForm";
@@ -60,6 +61,7 @@ const SignupFormManager = () => {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState({});
 
+  // Validate the current step
   const validateCurrentStep = () => {
     const newErrors = {};
     const requiredFields = {
@@ -74,10 +76,15 @@ const SignupFormManager = () => {
 
     requiredFields[currentStep]?.forEach((field) => {
       const fieldParts = field.split(".");
-      const value = fieldParts.length === 2 ? formData[fieldParts[0]][fieldParts[1]] : formData[field];
-      
+      const value =
+        fieldParts.length === 2
+          ? formData[fieldParts[0]][fieldParts[1]]
+          : formData[field];
+
       if (!value) {
-        newErrors[field] = `${fieldParts[fieldParts.length - 1].replace(/([A-Z])/g, " $1")} is required`;
+        newErrors[field] = `${fieldParts[fieldParts.length - 1]
+          .replace(/([A-Z])/g, " $1")
+          .toLowerCase()} is required`;
       }
     });
 
@@ -85,45 +92,63 @@ const SignupFormManager = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle the "Next" button click
   const handleNextStep = () => {
-    console.log("Next step");
-    setCurrentStep((prev) => Math.min(prev + 1, STEP_COMPONENTS.length - 1));
+    if (validateCurrentStep()) {
+      setCurrentStep((prev) => Math.min(prev + 1, STEP_COMPONENTS.length - 1));
+    }
   };
-  
 
+  // Handle the "Previous" button click
   const handlePrevStep = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
-  const renderStepComponent = () => {
-    switch (currentStep) {
-      case 0:
-        return <SignupForm formData={formData} setFormData={setFormData} errors={errors} />;
-      case 1:
-        return <ContactInformationForm formData={formData} setFormData={setFormData} errors={errors} />;
-      case 2:
-        return <InvestmentForm formData={formData} setFormData={setFormData} errors={errors} />;
-      case 3:
-        return <IdentificationDetails formData={formData} setFormData={setFormData} errors={errors} />;
-      case 4:
-        return <SavingsForm formData={formData} setFormData={setFormData} errors={errors} />;
-      case 5:
-        return <NextOfKinForm formData={formData} setFormData={setFormData} errors={errors} />;
-      case 6:
-        return <PasswordInput formData={formData} setFormData={setFormData} errors={errors} />;
-      default:
-        return null;
+  // Handle the final form submission
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/users/signup",
+        formData
+      );
+      alert("Signup successful!");
+      console.log(response.data);
+    } catch (error) {
+      alert(error.response?.data?.message || "Signup failed");
     }
+  };
+
+  // Render the current step component
+  const renderStepComponent = () => {
+    const StepComponent = STEP_COMPONENTS[currentStep];
+    return (
+      <StepComponent
+        formData={formData}
+        setFormData={setFormData}
+        errors={errors}
+        onSubmit={handleSubmit}
+      />
+    );
   };
 
   return (
     <div className="signup-flow max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-lg">
+      {/* Step Indicator */}
       <div className="relative flex justify-between items-center mb-8">
         {STEP_LABELS.map((label, index) => (
-          <StepIndicator key={index} index={index} currentStep={currentStep} label={label} />
+          <StepIndicator
+            key={index}
+            index={index}
+            currentStep={currentStep}
+            label={label}
+          />
         ))}
       </div>
+
+      {/* Render the current step */}
       {renderStepComponent()}
+
+      {/* Navigation Buttons */}
       <div className="flex justify-between mt-6">
         <button
           onClick={handlePrevStep}
@@ -132,18 +157,27 @@ const SignupFormManager = () => {
         >
           Previous
         </button>
-        <button
-          onClick={handleNextStep}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
-          disabled={currentStep === STEP_COMPONENTS.length - 1}
-        >
-          Next
-        </button>
+        {currentStep < STEP_COMPONENTS.length - 1 ? (
+          <button
+            onClick={handleNextStep}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
+          >
+            Next
+          </button>
+        ) : (
+          <button
+            onClick={handleSubmit}
+            className="bg-green-600 text-white px-4 py-2 rounded-md"
+          >
+            Submit
+          </button>
+        )}
       </div>
     </div>
   );
 };
 
+// Step Indicator Component
 const StepIndicator = ({ index, currentStep, label }) => {
   return (
     <div className="relative flex flex-col items-center w-full">
