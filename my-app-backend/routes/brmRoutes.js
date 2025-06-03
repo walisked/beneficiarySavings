@@ -51,4 +51,9 @@ router.delete("/delete/:id", async (req, res) => {
   }
 });
 
+// Add a catch-all route for undefined endpoints
+router.use((req, res) => {
+  res.status(404).json({ message: "BRM route not found" });
+});
+
 export default router; // Use default export

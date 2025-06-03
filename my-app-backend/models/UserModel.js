@@ -101,6 +101,22 @@ const UserSchema = new mongoose.Schema(
         required: [true, "Next of kin address is required"],
       },
     },
+    verificationToken: {
+      type: String, // Store the verification token
+    },
+    verificationTokenExpiresAt: {
+      type: Date, // Store the expiration date of the token
+    },
+    resetPasswordToken: {
+      type: String,
+    },
+    resetPasswordExpiresAt: {
+      type: Date,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

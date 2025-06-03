@@ -21,7 +21,7 @@ const LoginPage = () => {
       return;
     }
 
-    dispatch(loginUser({ email, password }));
+    dispatch(loginUser({ email, password, apiUrl: process.env.REACT_APP_API_URL }));
   };
 
   if (token) navigate('/dashboard');

@@ -32,7 +32,7 @@ const OnboardingPage = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:5000/api/brm/create", {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/brm/create`, {
         username: formData.username,
         password: formData.password,
       });

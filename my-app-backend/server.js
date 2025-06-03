@@ -1,11 +1,12 @@
-import dotenv from "dotenv"; // Import dotenv
+import dotenv from "dotenv"; // Load environment variables at the top
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import { lgaList } from "./state-lga-backend/lga.js"; // Adjust the path and add .js extension
 import userRoutes from "./routes/userRoutes.js"; // Use default import
-
-dotenv.config(); // Load environment variables at the top
+import authRoutes from "./routes/auth.js"
+import path from "path"; // Import path module
+dotenv.config(); // auth.js
 
 if (!process.env.MONGO_URI) {
   console.error("Error: MONGO_URI is not defined in the .env file");
@@ -17,18 +18,33 @@ app.use(express.json());
 app.use(cors());
 
 // Debugging: Check if MONGO_URI is loaded
-console.log("MONGO_URI:", process.env.MONGO_URI);  // This should print the correct MongoDB URI
+console.log("Connecting to MongoDB...");
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log("MongoDB Connected"))
-  .catch(err => console.error("MongoDB connection error:", err));
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
+  })
+  .then(() => {
+    console.log("MongoDB Connected");
+    // Start the server only after the database connection is successful
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err.message);
+    process.exit(1); // Exit the application if the connection fails
+  });
+
+// Serve static files (if applicable)
+const __dirname = path.resolve();
+app.use(express.static(path.join(__dirname, "public")));
 
 // Route to check if the server is working
 app.get("/", (req, res) => {
-  res.send("Hello  Walisked");
+  res.send("Hello Walisked");
 });
 
 // Route to fetch all states
@@ -56,8 +72,11 @@ app.get("/api/lgas", (req, res) => {
 });
 
 // Routes
+app.use("/api/auth", authRoutes); // Use authRoutes for authentication
 app.use("/api/users", userRoutes);
 app.use("/api/brm", (await import("./routes/brmRoutes.js")).default); // Dynamically import brmRoutes
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Handle unknown routes
+app.use((req, res, next) => {
+  res.status(404).json({ message: "Resource not found" });
+});
