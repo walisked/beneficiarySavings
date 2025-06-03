@@ -3,6 +3,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { generateVerificationToken } from "../utils/generateTokensetcookie.js"; // Import the token generator
+import { sendVerificationEmail } from "../mailtrap/email.js"; // Import the email sending function
+
 
 // Register User
 export const registerUser = async (req, res) => {
@@ -29,6 +31,9 @@ export const registerUser = async (req, res) => {
 
     // Create and save the user
     const user = await User.create(userData);
+
+    // Send verification email
+    await sendVerificationEmail(user.email, user.verificationToken);
 
     // Generate a JWT token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
