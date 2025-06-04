@@ -2,8 +2,8 @@ import User from "../models/UserModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { generateVerificationToken } from "../utils/generateTokensetcookie.js"; // Import the token generator
-import { sendVerificationEmail } from "../mailtrap/email.js"; // Import the email sending function
+import { generateVerificationToken, generateJwtToken, setTokenCookie } from "../utils/generateTokensetcookie.js"; // Import the token generator
+import { sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/email.js"; // Import the email sending functions
 
 
 // Register User
@@ -25,53 +25,22 @@ export const registerUser = async (req, res) => {
     // Hash the password
     userData.password = await bcrypt.hash(userData.password, 10);
 
-    // Generate a verification token and expiration
-    userData.verificationToken = generateVerificationToken(userData.email);
-    userData.verificationTokenExpiresAt = Date.now() + 12 * 60 * 60 * 1000; // 12 hours
+    // Generate verification code and expiration timestamp using the utility function
+    const { verificationCode, verificationCodeExpiresAt } = generateVerificationToken();
+    userData.verificationCode = verificationCode;
+    userData.verificationCodeExpiresAt = verificationCodeExpiresAt;
+
+    console.log("Generated verification code:", verificationCode);
+    console.log("Code expiration:", new Date(verificationCodeExpiresAt));
 
     // Create and save the user
     const user = await User.create(userData);
 
     // Send verification email
-    await sendVerificationEmail(user.email, user.verificationToken);
+    await sendVerificationEmail(user.email, verificationCode);
 
-    // Generate a JWT token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "30d",
-    });
-
-    // Set the token as a cookie
-    res.cookie("token", token, {
-      httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
-      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    });
-
-    // Return a response with the user data (excluding the password)
     res.status(201).json({
-      message: "User registered successfully.",
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        phone: user.phone,
-        nin: user.nin,
-        state: user.state,
-        LGA: user.LGA,
-        address: user.address,
-        occupation: user.occupation,
-        employer: user.employer,
-        monthlyEarnings: user.monthlyEarnings,
-        selectedInvestment: user.selectedInvestment,
-        selectedContribution: user.selectedContribution,
-        contributionFrequency: user.contributionFrequency,
-        Bemail: user.Bemail,
-        BVN: user.BVN,
-        utilityBill: user.utilityBill,
-        validated: user.validated,
-        nextOfKin: user.nextOfKin,
-        password: undefined, // Exclude the password from the response
-      },
+      message: "User registered successfully. Please check your email for the verification code.",
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -84,25 +53,29 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
 
-    // Compare the hashed password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
 
-    // Generate a JWT token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "30d",
+    // Generate JWT token
+    const token = generateJwtToken(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // Set the token in a cookie
+    setTokenCookie(res, token);
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
     });
-
-    // Set the token as a cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    });
-
-    res.status(200).json({ message: "Login successful" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -132,23 +105,53 @@ export const resetPassword = async (req, res) => {
 // Verify Email
 export const verifyEmail = async (req, res) => {
   try {
-    const { token } = req.params;
+    const { email, code } = req.body;
 
-    const user = await User.findOne({
-      verificationToken: token,
-      verificationTokenExpiresAt: { $gt: Date.now() }, // Ensure token is not expired
-    });
+    console.log("Email provided:", email);
+    console.log("Code provided:", code);
 
-    if (!user) return res.status(400).json({ message: "Invalid or expired token" });
+    const user = await User.findOne({ email });
+    console.log("User document:", user);
 
+    if (!user) {
+      return res.status(400).json({ success: false, message: "User not found" });
+    }
+
+    console.log("Stored verification code:", user.verificationCode);
+    console.log("Provided code (converted to number):", Number(code));
+
+    if (user.verificationCode !== Number(code)) {
+      return res.status(400).json({ success: false, message: "Invalid verification code" });
+    }
+
+    if (user.verificationCodeExpiresAt <= Date.now()) {
+      return res.status(400).json({ success: false, message: "Verification code has expired" });
+    }
+
+    // Mark the user as verified
     user.isVerified = true;
-    user.verificationToken = undefined; // Clear the token
-    user.verificationTokenExpiresAt = undefined; // Clear the expiration
+    user.verificationCode = undefined; // Clear the code
+    user.verificationCodeExpiresAt = undefined; // Clear the expiration
     await user.save();
 
-    res.status(200).json({ message: "Email verified successfully" });
+    // Send welcome email
+    await sendWelcomeEmail(user.email, user.username);
+
+    // Return success response
+    res.status(200).json({
+      success: true,
+      message: "Email verified successfully",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        isVerified: user.isVerified,
+        password: undefined, // Exclude password from response
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error verifying email:", error.message);
+    res.status(500).json({ success: false, message: "An error occurred while verifying the email" });
   }
 };
 

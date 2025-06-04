@@ -1,15 +1,25 @@
 import jwt from "jsonwebtoken";
 
 /**
- * Generate a JWT token for email verification.
- * @param {string} userId - The user ID to include in the token payload.
- * @returns {string} - The generated JWT token.
+ * Generates a 6-digit verification code and its expiration timestamp.
+ * @returns {object} An object containing the verification code and expiration timestamp.
  */
-export const generateVerificationToken = (userId) => {
-  const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: "7d", // Token expires in 7 days
-  });
-  return token; // Return the token
+export const generateVerificationToken = () => {
+  const verificationCode = Math.floor(100000 + Math.random() * 900000); // Generates a random 6-digit number
+  const verificationCodeExpiresAt = Date.now() + 10 * 60 * 1000; // Code expires in 10 minutes
+
+  return { verificationCode, verificationCodeExpiresAt };
+};
+
+/**
+ * Generates a JWT token.
+ * @param {object} payload - The data to include in the token.
+ * @param {string} secret - The secret key to sign the token.
+ * @param {object} options - Additional options for the token (e.g., expiration).
+ * @returns {string} The generated JWT token.
+ */
+export const generateJwtToken = (payload, secret, options = {}) => {
+  return jwt.sign(payload, secret, options);
 };
 
 /**

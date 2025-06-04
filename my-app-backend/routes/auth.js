@@ -13,7 +13,7 @@ const router = express.Router();
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/reset-password", resetPassword);
-router.get("/verify-email/:token", verifyEmail);
+router.post("/verify-email", verifyEmail); // Changed from GET to POST for email and code in the body
 router.post("/logout", logoutUser);
 
 export default router;
