@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { logout } from "../redux/slices/authSlice";
+import { logoutUser } from "../redux/slices/authSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 
@@ -12,7 +12,7 @@ const Navbar = () => {
 
   // Handle logout action
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logoutUser());
     navigate("/"); // Navigate to Home page
   };
 

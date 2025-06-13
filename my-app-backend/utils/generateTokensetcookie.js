@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 /**
  * Generates a 6-digit verification code and its expiration timestamp.
  * @returns {object} An object containing the verification code and expiration timestamp.
  */
 export const generateVerificationToken = () => {
-  const verificationCode = Math.floor(100000 + Math.random() * 900000); // Generates a random 6-digit number
+  const verificationCode = crypto.randomInt(100000, 999999);
   const verificationCodeExpiresAt = Date.now() + 10 * 60 * 1000; // Code expires in 10 minutes
 
   return { verificationCode, verificationCodeExpiresAt };
@@ -28,13 +29,11 @@ export const generateJwtToken = (payload, secret, options = {}) => {
  * @param {string} token - The JWT token to set in the cookie.
  */
 export const setTokenCookie = (res, token) => {
-  const maxAge = 18 * 25 * 60 * 70 * 1000; // Max age in milliseconds
-
   res.cookie("token", token, {
     httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
     secure: process.env.NODE_ENV === "production", // Use Secure flag in production
     sameSite: "strict", // Prevent CSRF attacks by restricting cross-site requests
-    maxAge, // Set the cookie expiration time
+    maxAge: 60 * 60 * 1000, // 1 hour
   });
 
   return token; // Return the token for further use

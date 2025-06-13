@@ -2,103 +2,164 @@ import User from "../models/UserModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { generateVerificationToken, generateJwtToken, setTokenCookie } from "../utils/generateTokensetcookie.js"; // Import the token generator
-import { sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/email.js"; // Import the email sending functions
+import { generateVerificationToken, generateJwtToken, setTokenCookie } from "../utils/generateTokensetcookie.js";
+import { sendVerificationEmail, sendWelcomeEmail, sendPasswordResetEmail, sendPasswordResetSuccessEmail } from "../mailtrap/email.js";
 
-
-// Register User
 export const registerUser = async (req, res) => {
   try {
     const userData = req.body;
 
-    // Check if the password is provided
     if (!userData.password) {
       return res.status(400).json({ message: "Password is required" });
     }
 
-    // Check if the email already exists
     const userExists = await User.findOne({ email: userData.email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Hash the password
+    // Hash password ONLY here
     userData.password = await bcrypt.hash(userData.password, 10);
 
-    // Generate verification code and expiration timestamp using the utility function
     const { verificationCode, verificationCodeExpiresAt } = generateVerificationToken();
     userData.verificationCode = verificationCode;
     userData.verificationCodeExpiresAt = verificationCodeExpiresAt;
 
-    console.log("Generated verification code:", verificationCode);
-    console.log("Code expiration:", new Date(verificationCodeExpiresAt));
-
-    // Create and save the user
     const user = await User.create(userData);
-
-    // Send verification email
-    await sendVerificationEmail(user.email, verificationCode);
-
+    try {
+      await sendVerificationEmail(user.email, verificationCode);
+    } catch (emailError) {
+      console.error("Email sending failed, but user created:", emailError);
+      // Optionally: inform the user to contact support if they don't get an email
+    }
     res.status(201).json({
-      message: "User registered successfully. Please check your email for the verification code.",
+      message: "User registered successfully. Please check your email for verification.",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        isVerified: user.isVerified,
+      },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Registration error:", error);
+    res.status(500).json({ message: "Registration failed", error: error.message });
   }
 };
 
-// Login User
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    // Use model method for consistent comparison
+    const isPasswordValid = await user.matchPassword(password);
+
     if (!isPasswordValid) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Generate JWT token
     const token = generateJwtToken(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    // Set the token in a cookie
     setTokenCookie(res, token);
+    user.lastLogin = new Date();
+    await user.save();
 
     res.status(200).json({
       message: "Login successful",
       token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        lastLogin: user.lastLogin,
+        isVerified: user.isVerified
+      }
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Login failed", error: error.message });
+  }
+};
+
+// Forgot Password
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    // Always return success to prevent email enumeration
+    if (!user) {
+      return res.status(200).json({
+        message: "If your email exists in our system, you'll receive a reset link"
+      });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpiry = Date.now() + parseInt(process.env.PASSWORD_RESET_EXPIRES);
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpiresAt = resetTokenExpiry;
+    await user.save();
+
+    await sendPasswordResetEmail(user.email, user.username, resetToken);
+
+    res.status(200).json({
+      message: "Password reset link sent to your email"
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ message: "Error processing request", error: error.message });
   }
 };
 
 // Reset Password
 export const resetPassword = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { token, newPassword } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpiresAt: { $gt: Date.now() }
+    });
 
-    const resetPasswordToken = crypto.randomBytes(32).toString("hex");
-    const resetPasswordExpiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset token"
+      });
+    }
 
-    user.resetPasswordToken = resetPasswordToken;
-    user.resetPasswordExpiresAt = resetPasswordExpiresAt;
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpiresAt = undefined;
     await user.save();
 
-    res.status(200).json({ message: "Password reset token generated" });
+    await sendPasswordResetSuccessEmail(user.email, user.username);
+
+    res.status(200).json({
+      success: true,
+      message: "Password has been reset successfully"
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Reset password error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error resetting password",
+      error: error.message
+    });
   }
 };
 
@@ -106,52 +167,40 @@ export const resetPassword = async (req, res) => {
 export const verifyEmail = async (req, res) => {
   try {
     const { email, code } = req.body;
-
-    console.log("Email provided:", email);
-    console.log("Code provided:", code);
-
     const user = await User.findOne({ email });
-    console.log("User document:", user);
-
+    
     if (!user) {
       return res.status(400).json({ success: false, message: "User not found" });
     }
 
-    console.log("Stored verification code:", user.verificationCode);
-    console.log("Provided code (converted to number):", Number(code));
-
-    if (user.verificationCode !== Number(code)) {
-      return res.status(400).json({ success: false, message: "Invalid verification code" });
+    // Compare as strings
+    if (user.verificationCode.toString() !== code.toString()) {
+      return res.status(400).json({ success: false, message: "Invalid code" });
     }
 
     if (user.verificationCodeExpiresAt <= Date.now()) {
-      return res.status(400).json({ success: false, message: "Verification code has expired" });
+      return res.status(400).json({ success: false, message: "Code expired" });
     }
 
-    // Mark the user as verified
     user.isVerified = true;
-    user.verificationCode = undefined; // Clear the code
-    user.verificationCodeExpiresAt = undefined; // Clear the expiration
+    user.verificationCode = undefined;
+    user.verificationCodeExpiresAt = undefined;
     await user.save();
 
-    // Send welcome email
     await sendWelcomeEmail(user.email, user.username);
-
-    // Return success response
+    
     res.status(200).json({
       success: true,
       message: "Email verified successfully",
       user: {
         id: user._id,
-        username: user.username,
         email: user.email,
-        isVerified: user.isVerified,
-        password: undefined, // Exclude password from response
-      },
+        isVerified: user.isVerified
+      }
     });
   } catch (error) {
-    console.error("Error verifying email:", error.message);
-    res.status(500).json({ success: false, message: "An error occurred while verifying the email" });
+    console.error("Verification error:", error);
+    res.status(500).json({ success: false, message: "Verification failed" });
   }
 };
 
@@ -162,6 +211,29 @@ export const logoutUser = async (req, res) => {
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// Check Authentication
+export const checkAuth = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password -resetPasswordToken -resetPasswordExpiresAt -verificationCode");
+    if (!user) {
+      return res.status(404).json({ success: false, isAuthenticated: false, message: "User not found" });
+    }
+    res.status(200).json({
+      success: true,
+      isAuthenticated: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        isVerified: user.isVerified,
+        lastLogin: user.lastLogin
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, isAuthenticated: false, message: "Error checking authentication status" });
   }
 };
 

@@ -1,24 +1,25 @@
 import { config } from "dotenv";
 import { MailtrapClient } from "mailtrap";
 
-config(); // Load environment variables from .env file
+config();
 
-const TOKEN = process.env.MAILTRAP_TOKEN; // Use the token from .env
-const ENDPOINT = process.env.MAILTRAP_ENDPOINT; // Use the endpoint from .env
+const TOKEN = process.env.MAILTRAP_TOKEN;
+const ENDPOINT = process.env.MAILTRAP_ENDPOINT;
 
 const client = new MailtrapClient({
   token: TOKEN,
-  endpoint: ENDPOINT, // Set the endpoint
+  endpoint: ENDPOINT,
+  testInboxId: 3788398, // or your actual inbox ID
 });
 
 const sender = {
-  email: "hello@demomailtrap.co",
+  email: "umararano",
   name: "Akafta",
 };
 
 const recipients = [
   {
-    email: "walidwalida0963@gmail.com",
+    email: "umararano@gmail.com", // Replace with your Mailtrap account email
   },
 ];
 
@@ -31,3 +32,11 @@ client
     category: "Integration Test",
   })
   .then(console.log, console.error);
+
+
+/** 
+ * Sends an invitation email to a user.
+ * @param {string} email - The recipient's email address.
+ * @param {string} link - The sign-in link for the user.
+ * @param {string} role - The role of the user being invited.
+ */

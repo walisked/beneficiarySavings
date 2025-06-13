@@ -6,6 +6,7 @@ import { lgaList } from "./state-lga-backend/lga.js"; // Adjust the path and add
 import userRoutes from "./routes/userRoutes.js"; // Use default import
 import authRoutes from "./routes/auth.js"
 import path from "path"; // Import path module
+import cookieParser from "cookie-parser";
 dotenv.config(); // auth.js
 
 if (!process.env.MONGO_URI) {
@@ -16,6 +17,7 @@ if (!process.env.MONGO_URI) {
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(cookieParser()); // Add cookie-parser middleware
 
 // Debugging: Check if MONGO_URI is loaded
 console.log("Connecting to MongoDB...");

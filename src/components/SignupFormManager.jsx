@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import SignupForm from "./SignupForm";
 import ContactInformationForm from "./ContactInformationForm";
@@ -7,6 +7,7 @@ import IdentificationDetails from "./IdentificationDetails";
 import SavingsForm from "./SavingsForm";
 import NextOfKinForm from "./NextOfKinForm";
 import PasswordInput from "./PasswordInput";
+import StepProgress from './ui/StepProgress';
 
 const STEP_COMPONENTS = [
   SignupForm,
@@ -19,7 +20,7 @@ const STEP_COMPONENTS = [
 ];
 
 const STEP_LABELS = [
-  "Signup",
+  "Account Info",
   "Contact Info",
   "Investment",
   "ID Details",
@@ -27,6 +28,51 @@ const STEP_LABELS = [
   "Next of Kin",
   "Set Password",
 ];
+
+// Validation rules for each step
+const VALIDATION_RULES = {
+  0: (data) => {
+    const errors = {};
+    if (!data.username) errors.username = "Username is required";
+    if (!data.email) errors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(data.email)) errors.email = "Email is invalid";
+    return errors;
+  },
+  1: (data) => {
+    const errors = {};
+    if (!data.phone) errors.phone = "Phone is required";
+    if (!data.nin) errors.nin = "NIN is required";
+    else if (data.nin.length !== 11) errors.nin = "NIN must be 11 digits";
+    if (!data.state) errors.state = "State is required";
+    if (!data.LGA) errors.LGA = "LGA is required";
+    if (!data.address) errors.address = "Address is required";
+    return errors;
+  },
+  2: (data) => {
+    const errors = {};
+    if (!data.selectedInvestment) errors.selectedInvestment = "Investment option is required";
+    if (!data.selectedContribution) errors.selectedContribution = "Contribution structure is required";
+    return errors;
+  },
+  3: (data) => {
+    const errors = {};
+    if (!data.BVN) errors.BVN = "BVN is required";
+    else if (data.BVN.length !== 11) errors.BVN = "BVN must be 11 digits";
+    return errors;
+  },
+  5: (data) => {
+    const errors = {};
+    if (!data.nextOfKin.fullname) errors["nextOfKin.fullname"] = "Full name is required";
+    if (!data.nextOfKin.phone) errors["nextOfKin.phone"] = "Phone is required";
+    return errors;
+  },
+  6: (data) => {
+    const errors = {};
+    if (!data.password) errors.password = "Password is required";
+    else if (data.password.length < 8) errors.password = "Password must be at least 8 characters";
+    return errors;
+  },
+};
 
 const INITIAL_FORM_DATA = {
   username: "",
@@ -57,37 +103,46 @@ const INITIAL_FORM_DATA = {
 };
 
 const SignupFormManager = () => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+  const [currentStep, setCurrentStep] = useState(() => {
+    const savedStep = localStorage.getItem('signupStep');
+    return savedStep ? parseInt(savedStep) : 0;
+  });
+  
+  const [formData, setFormData] = useState(() => {
+    const savedData = localStorage.getItem('signupData');
+    return savedData ? JSON.parse(savedData) : INITIAL_FORM_DATA;
+  });
+
   const [errors, setErrors] = useState({});
+
+  // Save to localStorage whenever state changes
+  useEffect(() => {
+    localStorage.setItem('signupData', JSON.stringify(formData));
+    localStorage.setItem('signupStep', currentStep.toString());
+  }, [formData, currentStep]);
+
+  // Clear storage on successful submission
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/users/signup",
+        formData
+      );
+      alert("Signup successful!");
+      console.log(response.data);
+      localStorage.removeItem('signupData');
+      localStorage.removeItem('signupStep');
+    } catch (error) {
+      alert(error.response?.data?.message || "Signup failed");
+    }
+  };
 
   // Validate the current step
   const validateCurrentStep = () => {
-    const newErrors = {};
-    const requiredFields = {
-      0: ["username", "email"],
-      1: ["phone", "nin", "state", "LGA", "address"],
-      2: ["selectedInvestment", "selectedContribution"],
-      3: ["nin"],
-      4: ["monthlyEarnings"],
-      5: ["nextOfKin.fullname", "nextOfKin.phone"],
-      6: ["password"],
-    };
-
-    requiredFields[currentStep]?.forEach((field) => {
-      const fieldParts = field.split(".");
-      const value =
-        fieldParts.length === 2
-          ? formData[fieldParts[0]][fieldParts[1]]
-          : formData[field];
-
-      if (!value) {
-        newErrors[field] = `${fieldParts[fieldParts.length - 1]
-          .replace(/([A-Z])/g, " $1")
-          .toLowerCase()} is required`;
-      }
-    });
-
+    const validationFn = VALIDATION_RULES[currentStep];
+    if (!validationFn) return true; // Skip validation if no rules
+    
+    const newErrors = validationFn(formData);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -104,20 +159,6 @@ const SignupFormManager = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
-  // Handle the final form submission
-  const handleSubmit = async () => {
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/users/signup",
-        formData
-      );
-      alert("Signup successful!");
-      console.log(response.data);
-    } catch (error) {
-      alert(error.response?.data?.message || "Signup failed");
-    }
-  };
-
   // Render the current step component
   const renderStepComponent = () => {
     const StepComponent = STEP_COMPONENTS[currentStep];
@@ -132,27 +173,21 @@ const SignupFormManager = () => {
   };
 
   return (
-    <div className="signup-flow max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-lg">
-      {/* Step Indicator */}
-      <div className="relative flex justify-between items-center mb-8">
-        {STEP_LABELS.map((label, index) => (
-          <StepIndicator
-            key={index}
-            index={index}
-            currentStep={currentStep}
-            label={label}
-          />
-        ))}
-      </div>
+    <div className="signup-flow max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-lg">
+      {/* Step Progress Indicator */}
+      <StepProgress 
+        steps={STEP_LABELS} 
+        currentStep={currentStep} 
+      />
 
       {/* Render the current step */}
       {renderStepComponent()}
 
       {/* Navigation Buttons */}
-      <div className="flex justify-between mt-6">
+      <div className="flex justify-between mt-8">
         <button
           onClick={handlePrevStep}
-          className="bg-gray-500 text-white px-4 py-2 rounded-md disabled:opacity-50"
+          className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md disabled:opacity-50"
           disabled={currentStep === 0}
         >
           Previous
@@ -160,16 +195,16 @@ const SignupFormManager = () => {
         {currentStep < STEP_COMPONENTS.length - 1 ? (
           <button
             onClick={handleNextStep}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md"
           >
-            Next
+            Continue
           </button>
         ) : (
           <button
             onClick={handleSubmit}
-            className="bg-green-600 text-white px-4 py-2 rounded-md"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
           >
-            Submit
+            Create Account
           </button>
         )}
       </div>
